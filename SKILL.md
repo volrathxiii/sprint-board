@@ -7,7 +7,9 @@ description: Use when a sprint starts and the user wants their sprint tickets pl
 
 One private Artifact per sprint: the user's sprint tickets as cards in work order, grouped by phase, each card with status, why it sits there, next step, dependencies and **asks** (who owes what, asked when, answered or not). On top sits "What I did · <day>" with a Copy button. The page is built from `template.html`; only its two data blocks change between refreshes.
 
-Jira goes through `jira-api` only. Slack and GitHub are read-only here: a Jira change (points, links, status) or a Slack post happens only after the user approves the exact text (`jira-api`, `slack-post`). No student, family or customer PII on the page (district names are fine).
+**Tools.** Jira: use the `jira-api` skill if it is installed, otherwise the Atlassian MCP (`searchJiraIssuesUsingJql`, `getJiraIssue`, `listJiraIssueComments`; ask for `customfield_10058` and `customfield_10020` explicitly, since its compact view leaves custom fields out). Slack: the `slack-post` skill if it is installed, otherwise the claude.ai Slack connector (`slack_search_public_and_private`, `slack_read_thread`; post with `slack_send_message_draft` or `slack_send_message` only after approval). GitHub: the `gh` CLI.
+
+Slack and GitHub are read-only here: a Jira change (points, links, status) or a Slack post happens only after the user approves the exact text. No student, family or customer PII on the page (district names are fine).
 
 ## Files
 
@@ -41,7 +43,7 @@ Statuses the renderer knows are in `STATUS` (outside the data block). A new Jira
 
 ## Mode 1: plan a new sprint
 
-1. **Tickets.** JQL `assignee = currentUser() AND sprint in openSprints()`; for each, `node .claude/skills/jira-api/scripts/fetch-ticket.ts TAP-XXXX` (description, comments, links, linked PRs).
+1. **Tickets.** JQL `assignee = currentUser() AND sprint in openSprints()`; for each, get the description, comments, issue links and linked PRs (`node .claude/skills/jira-api/scripts/fetch-ticket.ts TAP-XXXX` with `jira-api`; otherwise `getJiraIssue` with `issuelinks` plus `gh search prs TAP-XXXX --owner TransActComm`).
 2. **Dependencies.** For each ticket, from the real sources, not guesses:
    - Jira links (`issuelinks`: blocks / is blocked by / relates) and other keys named in the description and comments; fetch each one's status, assignee and sprint.
    - The same code or flow as another sprint ticket (they go back to back, and merge order matters).
@@ -50,7 +52,7 @@ Statuses the renderer knows are in `STATUS` (outside the data block). A new Jira
    Mark inference as inference on the card ("I haven't checked the code yet").
 3. **Points.** Check each estimate against `refine-ticket`'s estimation drivers and floors; put a differing number in `sug`. Change Jira only after the user approves.
 4. **Order into phases.** In-flight and approved work first, then dated commitments, then clusters that share code (back to back, one local stack), then big work waiting on spec approval, and last a "Blocked · Propose moving out" phase (`blocked:true`). Each card's `why` says why it sits there.
-5. **Asks.** Every open question or approval becomes an ask on its card. Search Slack (`from:me` + the key) and Jira comments to fill `asked` and `src`; an ask that wasn't sent is `asked:""`. Offer drafts for the unsent ones through `slack-post` (draft first, real mentions).
+5. **Asks.** Every open question or approval becomes an ask on its card. Search Slack (`from:me` + the key) and Jira comments to fill `asked` and `src`; an ask that wasn't sent is `asked:""`. Offer drafts for the unsent ones (through `slack-post` if installed; either way: show the draft first, use real `<@USERID>` mentions).
 6. Show the order and the reasons in chat and get the user's OK. Then copy `template.html` to `.claude/sprint-board/<sprint-slug>/page.html`, change the `<title>` to `<Sprint name> Plan`, fill both data blocks, run `check.js`, and publish as a new artifact (the Artifact tool's new-page rules apply). Write `state.json` with the returned URL.
 
 ## Mode 2: refresh

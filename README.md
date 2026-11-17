@@ -10,7 +10,11 @@ Clone it into your project's skills folder:
 git clone https://github.com/volrathxiii/sprint-board.git .claude/skills/sprint-board
 ```
 
-It relies on the `jira-api` and `slack-post` skills and on the `gh` CLI, so those need to work in your setup first.
+It needs Jira, Slack and GitHub access in Claude Code:
+
+- **Jira:** the Atlassian MCP (or a `jira-api` skill, if you have one)
+- **Slack:** the claude.ai Slack connector (or a `slack-post` skill, if you have one)
+- **GitHub:** the `gh` CLI, logged in
 
 ## Use
 
