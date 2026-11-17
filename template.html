@@ -1,0 +1,283 @@
+<title>Nexus Sprint 24 Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: end-of-day update → one ordered lane of ticket cards grouped by phase; asks live on each card */
+:root{
+  --bg:#f5f6f3; --surface:#ffffff; --sunk:#eef1ee; --fg:#1d2321; --muted:#5d6763; --line:#dde2de;
+  --accent:#1f6f6b; --accent-soft:#e2f0ee;
+  --ok:#2e7d4f; --ok-soft:#e3f3e8;
+  --warn:#9a6400; --warn-soft:#fbf0d9;
+  --bad:#b3332b; --bad-soft:#fbe4e1;
+  --info:#3756a8; --info-soft:#e5ebfa;
+  --idle:#a9b3ae;
+  --font-body:"Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141917; --surface:#1c2320; --sunk:#171d1b; --fg:#e6ebe8; --muted:#9aa5a0; --line:#2e3834;
+  --accent:#5cc0b7; --accent-soft:#1d3532;
+  --ok:#6fcf93; --ok-soft:#1a3324;
+  --warn:#e8b04a; --warn-soft:#3a2d12;
+  --bad:#f08077; --bad-soft:#3d1f1c;
+  --info:#93abf0; --info-soft:#1f2a47;
+  --idle:#4a5652;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#141917; --surface:#1c2320; --sunk:#171d1b; --fg:#e6ebe8; --muted:#9aa5a0; --line:#2e3834;
+  --accent:#5cc0b7; --accent-soft:#1d3532;
+  --ok:#6fcf93; --ok-soft:#1a3324;
+  --warn:#e8b04a; --warn-soft:#3a2d12;
+  --bad:#f08077; --bad-soft:#3d1f1c;
+  --info:#93abf0; --info-soft:#1f2a47;
+  --idle:#4a5652;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5}
+.wrap{width:100%;margin:0;padding-block:32px 64px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));display:flex;flex-direction:column;gap:28px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:30px;line-height:1.15;margin:0;text-wrap:balance;font-weight:700}
+h2{font-size:18px;margin:0;font-weight:700;text-wrap:balance}
+.sub{color:var(--muted);margin:0;max-width:65ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.now-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px}
+.now-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.now-list li{display:flex;gap:10px;align-items:baseline;min-width:0}
+.now-list .lbl{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);width:68px;flex:none}
+.now-list .val{min-width:0}
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--sunk)}
+.bar i{display:block;height:100%}
+.bar-legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.bar-legend span{display:inline-flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums}
+.bar-legend b{color:var(--fg);font-weight:600}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.phasebar{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.phasebar .row{display:grid;grid-template-columns:minmax(0,1fr) 120px 56px;gap:10px;align-items:center}
+.phasebar .row span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.phasebar .row.cur span:first-child{font-weight:700}
+.mini{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--sunk)}
+.mini i{display:block;height:100%}
+.who{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.who h3{margin:0;font-size:14.5px;font-weight:700;display:flex;justify-content:space-between;gap:8px}
+.who h3 small{font-weight:600;color:var(--muted);font-size:12px}
+.who ul{margin:0;padding-left:18px;font-size:13.5px;display:flex;flex-direction:column;gap:3px}
+.who.hard{border-color:var(--bad)}
+.share{display:flex;flex-direction:column;gap:10px}
+.share-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.btn{font:inherit;font-weight:600;font-size:14px;background:var(--accent);color:var(--surface);border:0;border-radius:8px;padding:8px 14px;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+textarea{width:100%;min-height:210px;font-family:var(--font-mono);font-size:12.5px;line-height:1.55;background:var(--sunk);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:12px;resize:vertical}
+.copied{font-size:13px;color:var(--ok);font-weight:600}
+.phase{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:12px;align-items:start}
+.phase > .phase-head{grid-column:1 / -1}
+.sub{max-width:none}
+.phase-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px}
+.phase-head p{margin:0;color:var(--muted);font-size:13.5px;flex:1 1 280px;min-width:0}
+.here{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--accent);color:var(--surface);padding:2px 8px;border-radius:5px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:40px minmax(0,1fr);gap:4px 14px}
+.card.blocked{border-style:dashed}
+.card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.num{grid-row:1 / span 2;width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.card.blocked .num{background:var(--bad-soft);color:var(--bad)}
+.card.active .num{background:var(--accent);color:var(--surface)}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-width:0}
+.key{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--accent);text-decoration:none}
+.key:hover{text-decoration:underline}
+.pill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.st-sched{background:var(--info-soft);color:var(--info)}
+.st-prog{background:var(--warn-soft);color:var(--warn)}
+.st-uat{background:var(--ok-soft);color:var(--ok)}
+.st-review{background:var(--accent-soft);color:var(--accent)}
+.asks{border:1px dashed var(--line);border-radius:8px;padding:8px 10px;margin:8px 0 0;font-size:13.5px}
+.asks b{display:block;margin-bottom:4px}
+.asks ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.asks .who-tag{display:inline-block;font-weight:700;margin-right:6px}
+.asked{display:inline-block;font-size:11.5px;color:var(--muted);background:var(--sunk);border-radius:999px;padding:0 7px;margin-left:4px;white-space:nowrap}
+.asked.not{color:var(--warn);background:var(--warn-soft)}
+.asks li.hard .who-tag{color:var(--bad)}
+.asked.ans{color:var(--ok);background:var(--ok-soft);white-space:normal}
+.asks li.done{color:var(--muted)}
+.asks li.done .who-tag{color:var(--ok)}
+.asks .src{font-size:11.5px;margin-left:4px}
+.due{display:inline-block;font-size:12px;font-weight:700;color:var(--bad);background:var(--bad-soft);border-radius:999px;padding:1px 8px}
+.upd{background:var(--accent-soft);border-left:3px solid var(--accent);padding:6px 10px;border-radius:6px;margin:0 0 8px}
+.st-block{background:var(--bad-soft);color:var(--bad)}
+.pts{margin-left:auto;font-family:var(--font-mono);font-size:12.5px;color:var(--muted);white-space:nowrap}
+.pts em{font-style:normal;color:var(--warn);font-weight:600}
+.title{font-weight:600;font-size:15.5px;margin:2px 0 0;min-width:0}
+.body{grid-column:2;display:flex;flex-direction:column;gap:10px;margin-top:6px;min-width:0}
+.why,.next{margin:0}
+.why b,.next b{font-weight:600}
+.next{font-size:13.5px;color:var(--muted)}
+.next b{color:var(--fg)}
+.deps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.dep{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:start;font-size:13.5px;padding:7px 10px;border-radius:8px}
+.dep .tag{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:5px;white-space:nowrap;margin-top:1px}
+.dep.block{background:var(--bad-soft)} .dep.block .tag{background:var(--bad);color:var(--surface)}
+.dep.wait{background:var(--warn-soft)} .dep.wait .tag{background:var(--warn);color:var(--surface)}
+.dep.inside{background:var(--info-soft)} .dep.inside .tag{background:var(--info);color:var(--surface)}
+.dep.none{background:var(--ok-soft)} .dep.none .tag{background:var(--ok);color:var(--surface)}
+.dep a{color:inherit;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+#phases{display:flex;flex-direction:column;gap:28px}
+footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:640px){
+  h1{font-size:25px}
+  .now-grid{grid-template-columns:minmax(0,1fr)}
+  .phasebar .row{grid-template-columns:minmax(0,1fr) 80px 48px}
+  .card{grid-template-columns:32px minmax(0,1fr);padding:14px}
+  .num{width:28px;height:28px;font-size:13px}
+  .pts{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1 id="h1"></h1>
+    <p class="sub">All my tickets in the order I'm working them. Each card shows where it stands and what I need from whom. The box below is my end-of-day update.</p>
+  </header>
+
+  <section class="panel share" aria-labelledby="shareH">
+    <div class="share-top">
+      <h2 id="shareH">What I did · <span id="didDay"></span></h2>
+      <div style="display:flex;gap:10px;align-items:center"><span class="copied" id="copied" hidden>Copied</span><button class="btn" id="copyBtn" type="button">Copy update</button></div>
+    </div>
+    <textarea id="update" readonly aria-label="What I did today"></textarea>
+  </section>
+
+  <div class="legend" aria-label="Legend for dependencies">
+    <span><i class="dot" style="background:var(--bad)"></i>Blocked: cannot start</span>
+    <span><i class="dot" style="background:var(--warn)"></i>Waiting on someone else</span>
+    <span><i class="dot" style="background:var(--info)"></i>Depends on another ticket in this sprint</span>
+    <span><i class="dot" style="background:var(--ok)"></i>Nothing blocking</span>
+  </div>
+
+  <div id="phases"></div>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+const J = k => `https://pathwise.atlassian.net/browse/${k}`;
+const PR = (repo, n) => `<a href="https://github.com/TransActComm/${repo}/pull/${n}">${repo}#${n}</a>`;
+const T = k => `<a href="${J(k)}">${k}</a>`;
+const strip = h => h.replace(/<[^>]+>/g, "");
+
+/* progress: done | close (in UAT) | doing | todo | blocked */
+const STATUS = {
+  "Hardening in UAT": {cls:"st-uat", prog:"close"},
+  "Ready For Code Review": {cls:"st-review", prog:"review"},
+  "Awaiting Merge": {cls:"st-review", prog:"review"},
+  "In Progress": {cls:"st-prog", prog:"doing"},
+  "Scheduled": {cls:"st-sched", prog:"todo"},
+  "Deployed": {cls:"st-uat", prog:"done"}
+};
+const PROG = {
+  done:{label:"Done",color:"var(--ok)"},
+  close:{label:"In UAT",color:"var(--accent)"},
+  review:{label:"In review or merge",color:"var(--info)"},
+  doing:{label:"In progress",color:"var(--warn)"},
+  todo:{label:"Not started",color:"var(--idle)"},
+  blocked:{label:"Blocked",color:"var(--bad)"}
+};
+
+/* ==== DATA:START (sprint-board skill: refresh edits only between the DATA markers) ==== */
+const SPRINT = "Nexus Sprint 24";
+const OWNER = "Your Name";
+const ASOF = "1 Dec 2026";
+const FOOTER = "Statuses from Jira, GitHub and Slack on 1 Dec 2026. Points marked \"suggested\" are not applied in Jira yet. This page doesn't update by itself: ask Claude to refresh the sprint board.";
+const phases = [
+ {id:"p1",name:"Phase 1 · Finish what's in flight", note:"Approved work: merge and test.", tickets:[
+  {n:1,key:"TAP-1000",title:"Plain-language title of the ticket",status:"Ready For Code Review",pts:3,
+   upd:"What changed since the last refresh, with links: "+PR("Portage-frontend",1)+".",
+   why:"Why it sits here in the order.",
+   next:"The very next step.",
+   deps:[["wait","Jommar","Code review of "+PR("Portage-frontend",1)+"."]],
+   asks:[{who:"Jommar",what:"Review "+PR("Portage-frontend",1)+".",asked:"1 Dec",src:"https://slack.com/archives/C0C2DJFKATW/p0000000000000000"},
+         {who:"Yuliia",what:"Approve the wording.",asked:"30 Nov",hard:true,ans:"1 Dec: approved in the thread"},
+         ["Me","Link TAP-1000 ↔ TAP-1001 in Jira.",""]]}
+ ]},
+ {id:"pb",name:"Blocked · Propose moving out", note:"Can't start this sprint unless the blockers clear.", blocked:true, tickets:[
+  {n:2,key:"TAP-1001",title:"A ticket that waits on another team",status:"Scheduled",pts:5,sug:8,
+   why:"Can't start.", next:"Wait for TAP-999.",
+   deps:[["block","Michael",T("TAP-999")+" has no sprint yet."]],
+   asks:[{who:"Michael",what:"What's the timeline for TAP-999?",asked:"",hard:true}]}
+ ]}
+];
+/* ==== DATA:END ==== */
+
+const stripTags = h => h.replace(/<[^>]+>/g,"");
+/* an ask is [who, what, asked, hard, answered] or {who, what, asked, hard, ans, src} */
+const askOf = a => Array.isArray(a) ? {who:a[0], what:a[1], asked:a[2], hard:a[3], ans:a[4]} : a;
+const askTag = a => a.ans ? `<span class="asked ans">answered ${a.ans}</span>`
+  : a.who==="Me" ? `<span class="asked">to do</span>`
+  : a.asked ? `<span class="asked">asked ${a.asked}</span>` : `<span class="asked not">not asked yet</span>`;
+const all = phases.flatMap(p => p.tickets.map(t => ({...t, phase:p})));
+const ptsOf = t => t.sug ?? t.pts;
+const progOf = t => t.phase.blocked ? "blocked" : (STATUS[t.status]?.prog ?? "todo");
+
+/* current position = first phase that still has unfinished, unblocked work */
+const curPhase = phases.find(p => !p.blocked && p.tickets.some(t => ["doing","todo"].includes(progOf({...t,phase:p})))) || phases[0];
+const active = all.filter(t => ["doing","review","close"].includes(progOf(t)));
+const nextUp = all.find(t => progOf(t) === "todo");
+
+/* Cards */
+const root = document.getElementById("phases");
+for (const p of phases){
+  const sec = document.createElement("section");
+  sec.className="phase";
+  sec.innerHTML = `<div class="phase-head"><h2>${p.name}</h2>${p===curPhase?'<span class="here">You are here</span>':""}<p>${p.note}</p></div>` +
+   p.tickets.map(t => {
+     const pr = progOf({...t,phase:p});
+     const isActive = ["doing","review","close"].includes(pr);
+     const pill = p.blocked ? `<span class="pill st-block">Blocked · ${t.status}</span>` : `<span class="pill ${STATUS[t.status]?.cls||"st-sched"}">${t.status}</span>`;
+     return `
+    <article class="card${p.blocked?" blocked":""}${isActive?" active":""}">
+      <div class="num" aria-hidden="true">${t.n}</div>
+      <div class="top">
+        <a class="key" href="${J(t.key)}">${t.key}</a>${pill}
+        <span class="pts">${t.sug?`${t.pts} → <em>${t.sug} pts suggested</em>`:`${t.pts} pts`}</span>
+      </div>
+      <p class="title">${t.title}</p>${t.due?`<span class="due">Due: ${t.due}</span>`:""}
+      <div class="body">
+        ${t.upd?`<p class="upd"><b>Latest (17 Nov):</b> ${t.upd}</p>`:""}
+        <p class="why"><b>Why here:</b> ${t.why}</p>
+        <p class="next"><b>Next:</b> ${t.next}</p>
+        <ul class="deps">${t.deps.map(([c,tag,txt])=>`<li class="dep ${c}"><span class="tag">${tag}</span><span>${txt}</span></li>`).join("")}</ul>
+        ${(t.asks&&t.asks.length)?`<div class="asks"><b>Asks</b><ul>${t.asks.map(askOf).map(a=>`<li class="${a.ans?"done":(a.hard?"hard":"")}"><span class="who-tag">${a.who}</span>${a.what} ${askTag(a)}${a.src?` <a class="src" href="${a.src}">where</a>`:""}</li>`).join("")}</ul></div>`:""}
+      </div>
+    </article>`; }).join("");
+  root.appendChild(sec);
+}
+
+/* End-of-day update: what I did (refresh by asking Claude) */
+/* ==== DID:START ==== */
+const DID_DAY = "Mon 1 Dec";
+const DID = [
+ ["My sprint tickets", ["TAP-1000: opened Portage-frontend#1 and asked for review."]],
+ ["Reviews for the team", ["TAP-1100 (EJ): approved Portage-backend#2."]],
+ ["Other", ["Flagged a failing typecheck on ops/development."]]
+];
+/* ==== DID:END ==== */
+document.getElementById("didDay").textContent = DID_DAY;
+document.getElementById("eyebrow").textContent = `${SPRINT} · ${OWNER} · as of ${ASOF}`;
+document.getElementById("h1").textContent = `${SPRINT.replace(/^Nexus /,"")} work order`;
+document.getElementById("footer").textContent = FOOTER;
+const text = [`What I did · ${DID_DAY}`, ...DID.flatMap(([h, items]) => ["", `${h}:`, ...items.map(i => `• ${i}`)])].join("\n");
+const ta = document.getElementById("update");
+ta.value = text;
+const copied = document.getElementById("copied");
+document.getElementById("copyBtn").addEventListener("click", () => {
+  const show = () => { copied.hidden = false; setTimeout(()=>copied.hidden = true, 2000); };
+  const fallback = () => { ta.focus(); ta.select(); try { if (document.execCommand("copy")) show(); } catch(e){} };
+  try { navigator.clipboard.writeText(text).then(show, fallback); } catch(e){ fallback(); }
+});
+</script>
